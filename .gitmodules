@@ -1,0 +1,6 @@
+[submodule "projects/mfe_master"]
+	path = projects/mfe_master
+	url = git@github.com:2bitlab/mfe_master.git
+[submodule "projects/subapp_login"]
+	path = projects/subapp_login
+	url = git@github.com:2bitlab/subapp_login.git
