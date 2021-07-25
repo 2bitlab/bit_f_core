@@ -1,12 +1,18 @@
 # bit_f_core
-前端项目
 
+前端项目
 
 ## 说明
 
 本项目使用 git submodule + lerna 管理的 基于 qiankun 的微前端项目
 
 如果对以上知识点不了解，请先阅读`学习资料`的相关模块先建立起初步认知
+
+## Start
+
+```bash
+lerna bootstrap
+```
 
 ## 常用命令
 
@@ -40,7 +46,7 @@ git submodule add git@github.com:thomas-bello/subapp_vue_demo.git projects/subap
 lerna publish
 ```
 
-发布权限 找 晓辉在npm 的 belloai group 中把你添加进去
+发布权限 找 晓辉在 npm 的 belloai group 中把你添加进去
 
 ### 学习资料
 
@@ -48,3 +54,4 @@ lerna publish
 - [git-submodule 官方文档](https://git-scm.com/docs/git-submodule)
 - [使用 Lerna 构建项目](https://github.com/thomas-bello/mfe_showcase/blob/leason_1_lerna/doc/leason_1_lerna.md)
 - [用 GitHub Actions 实现自动发布 NPM 包](https://www.jianshu.com/p/fe4691bab958)
+- [Github Action 部署博客到阿里云 OSS](https://www.jianshu.com/p/99952652b2dd)
