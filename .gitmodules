@@ -4,3 +4,6 @@
 [submodule "projects/subapp_login"]
 	path = projects/subapp_login
 	url = git@github.com:2bitlab/subapp_login.git
+[submodule "projects/subapp_admin"]
+	path = projects/subapp_admin
+	url = git@github.com:2bitlab/subapp_admin.git
