@@ -27,7 +27,7 @@
     "typescript": "^4.3.4"
   },
   "scripts": {
-    "init": "lerna bootstrap",
+    "setup": "lerna bootstrap",
     "test": "jest",
     "lint": "vue-cli-service lint",
     "lv": "lerna version --no-commit-hooks --no-git-tag-version --no-private",
