@@ -8,6 +8,7 @@
     ],
     "nohoist": [
       "mfe_master/**",
+      "subapp_admin/**",
       "subapp_login/**"
     ]
   },
