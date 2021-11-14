@@ -7,23 +7,23 @@
     "importHelpers": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
+    "noImplicitAny": false,
     "baseUrl": ".",
-    "types": ["webpack-env", "jest"],
+    "types": ["node", "webpack-env", "jest", "vue"],
+    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
     "paths": {
       "@/*": ["src/*"]
-    },
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
+    }
   },
   "include": [
-    "**/src/**/*.ts",
-    "**/src/**/*.tsx",
-    "**/src/**/*.vue",
-    "**/tests/**/*.ts",
-    "**/tests/**/*.tsx"
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
   ],
   "exclude": ["node_modules"]
 }
