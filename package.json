@@ -9,7 +9,9 @@
     "nohoist": [
       "mfe_master/**",
       "subapp_admin/**",
-      "subapp_login/**"
+      "subapp_login/**",
+      "@2bitlab/ls/**",
+      "@2bitlab/fetch/**"
     ]
   },
   "devDependencies": {

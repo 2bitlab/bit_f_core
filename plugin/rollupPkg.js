@@ -20,7 +20,10 @@ export default ({
     sourcemap: true,
     footer: `
     if(typeof window !== 'undefined') {
-      window.${name}Version = '${version}'
+      window.pgk_${name
+        .replace(/@/g, '_')
+        .replace(/-/g, '_')
+        .replace(/\//g, '_')}_version = '${version}'
     }`
   }
 
