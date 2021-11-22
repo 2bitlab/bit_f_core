@@ -11,7 +11,8 @@
       "subapp_admin/**",
       "subapp_login/**",
       "@2bitlab/ls/**",
-      "@2bitlab/fetch/**"
+      "@2bitlab/fetch/**",
+      "@2bitlab/moment/**"
     ]
   },
   "devDependencies": {
