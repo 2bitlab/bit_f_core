@@ -63,3 +63,44 @@ export const getListByIds = async ({ ids, getDataFunc, cache }: any) => {
     })
     .filter((i: any) => i)
 }
+
+/**
+ * 需要内置 dataId 属性
+ */
+export const initApiDataMixin = ({
+  mapState,
+  mapActions,
+  entityKey,
+  apiDataModuleName = 'apiDataModule'
+}) => {
+  return {
+    computed: {
+      ...mapState(apiDataModuleName, ['dataMap']),
+      entityData({ dataId, dataMap }) {
+        const entityDataMap = (dataMap || {})[entityKey]
+        return (entityDataMap || {})[dataId]
+      },
+      hadCacheData({ entityData }) {
+        return !!entityData
+      }
+    },
+    watch: {
+      hadCacheData: {
+        handler(newValue) {
+          const { dataId, getData } = this
+          if (dataId && newValue === false && getData) {
+            this.getData({
+              entryKey: entityKey,
+              dataId,
+              passCache: true
+            }).then()
+          }
+        },
+        immediate: true
+      } as any
+    },
+    methods: {
+      ...mapActions(apiDataModuleName, ['getData'])
+    }
+  } as any
+}
