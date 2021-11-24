@@ -13,7 +13,9 @@
       "@2bitlab/ls/**",
       "@2bitlab/fetch/**",
       "@2bitlab/moment/**",
-      "@2bitlab/state/**"
+      "@2bitlab/state/**",
+      "@2bitlab/qs/**",
+      "@2bitlab/router/**"
     ]
   },
   "devDependencies": {
