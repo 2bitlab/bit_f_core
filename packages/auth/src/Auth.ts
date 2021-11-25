@@ -1,9 +1,19 @@
-import * as utils from './utils'
+import {
+  RouteConfig,
+  MenuItem,
+  Route,
+  defaultAuthFn,
+  getRouterMapByRouter,
+  getPermissionMapByRouterMap,
+  getMenuByRouteMap,
+  getPermissionMenuItem,
+  getPermissionMenuList
+} from './utils'
 
 export default class Auth {
   authFn: () => false
-  routeMap: Map<string, utils._RouteConfig>
-  menu: utils.MenuItem[]
+  routeMap: Map<string, RouteConfig>
+  menu: MenuItem[]
   permissionRouterMap: Map<string, string[]>
   constructor({
     authFn,
@@ -11,17 +21,17 @@ export default class Auth {
     menu
   }: {
     authFn?: any
-    routes: utils._RouteConfig[]
-    menu: utils.MenuItem[]
+    routes: RouteConfig[]
+    menu: MenuItem[]
   }) {
     this.authFn =
       Object.prototype.toString.call(authFn) === '[object Function]'
         ? authFn
-        : utils.defaultAuthFn
+        : defaultAuthFn
 
-    this.routeMap = utils.getRouterMapByRouter(routes)
-    this.permissionRouterMap = utils.getPermissionMapByRouterMap(this.routeMap)
-    this.menu = utils.getMenuByRouteMap(menu, this.routeMap)
+    this.routeMap = getRouterMapByRouter(routes)
+    this.permissionRouterMap = getPermissionMapByRouterMap(this.routeMap)
+    this.menu = getMenuByRouteMap(menu, this.routeMap)
   }
   static install(Vue): void {
     Vue.prototype.$auth = function (permission: string): boolean {
@@ -33,38 +43,38 @@ export default class Auth {
       return haveAuth
     }
   }
-  updateRouter(routes: utils._RouteConfig[]): utils._RouteConfig[] {
-    this.routeMap = utils.getRouterMapByRouter(routes)
-    this.permissionRouterMap = utils.getPermissionMapByRouterMap(this.routeMap)
+  updateRouter(routes: RouteConfig[]): RouteConfig[] {
+    this.routeMap = getRouterMapByRouter(routes)
+    this.permissionRouterMap = getPermissionMapByRouterMap(this.routeMap)
 
     return routes
   }
-  updateMenu(menu: utils.MenuItem[]): utils.MenuItem[] {
-    this.menu = utils.getMenuByRouteMap(menu, this.routeMap)
+  updateMenu(menu: MenuItem[]): MenuItem[] {
+    this.menu = getMenuByRouteMap(menu, this.routeMap)
     return this.menu
   }
   checkRoutePermission({
     route,
     permissions
   }: {
-    route: utils._Route
+    route: Route
     permissions: string[]
   }): boolean {
-    return utils.getPermissionMenuItem({
+    return getPermissionMenuItem({
       routerPermissions: this.permissionRouterMap.get(
         route?.fullPath || route?.path
       ),
       permissions
     })
   }
-  getMenuByPermissions(permissions: string[]): utils.MenuItem[] {
-    return utils.getPermissionMenuList(this.routeMap, this.menu, permissions)
+  getMenuByPermissions(permissions: string[]): MenuItem[] {
+    return getPermissionMenuList(this.routeMap, this.menu, permissions)
   }
 
-  getMenu(menu: utils.MenuItem[], permissions: string[]): utils.MenuItem[] {
-    return utils.getPermissionMenuList(
+  getMenu(menu: MenuItem[], permissions: string[]): MenuItem[] {
+    return getPermissionMenuList(
       this.routeMap,
-      utils.getMenuByRouteMap(menu, this.routeMap),
+      getMenuByRouteMap(menu, this.routeMap),
       permissions
     )
   }
