@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/tsconfig",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "2bitlab 前端项目推荐的 typescript 配置",
   "author": "thomasliu <thomas_0836@qq.com>",
   "homepage": "https://github.com/2bitlab/bit_f_core#readme",

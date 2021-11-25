@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/router",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "router 想用方法",
   "keywords": [
     "router"
@@ -17,6 +17,9 @@
   },
   "module": "lib/index.esm.js",
   "types": "lib/index.d.ts",
+  "main": "lib/index.common.js",
+  "unpkg": "lib/index.js",
+  "jsdelivr": "lib/index.js",
   "files": [
     "src",
     "lib"
@@ -34,6 +37,6 @@
     "url": "https://github.com/2bitlab/bit_f_core/issues"
   },
   "dependencies": {
-    "@2bitlab/qs": "^1.0.0"
+    "@2bitlab/qs": "^1.0.1"
   }
 }

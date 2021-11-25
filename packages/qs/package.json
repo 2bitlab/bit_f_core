@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/qs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "qs 相关路由常用方法",
   "keywords": [
     "qs"
@@ -17,6 +17,9 @@
   },
   "module": "lib/index.esm.js",
   "types": "lib/index.d.ts",
+  "main": "lib/index.common.js",
+  "unpkg": "lib/index.js",
+  "jsdelivr": "lib/index.js",
   "files": [
     "src",
     "lib"

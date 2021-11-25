@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/queue-load",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "队列加载工具",
   "keywords": [
     "Local",
@@ -18,6 +18,9 @@
   },
   "module": "lib/index.esm.js",
   "types": "lib/index.d.ts",
+  "main": "lib/index.common.js",
+  "unpkg": "lib/index.js",
+  "jsdelivr": "lib/index.js",
   "files": [
     "src",
     "lib"

@@ -53,6 +53,7 @@
     "rimraf": "^3.0.2",
     "rollup": "^2.45.1",
     "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-buble": "^0.19.8",
     "rollup-plugin-dts": "^4.0.1",
     "rollup-plugin-generate-html-template": "^1.7.0",
     "rollup-plugin-node-resolve": "^5.2.0",
