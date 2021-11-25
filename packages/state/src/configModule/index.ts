@@ -1,5 +1,3 @@
-import { merge } from 'lodash'
-
 export interface I18nMap {
   [key: string]: string
 }
@@ -66,8 +64,8 @@ export const initConfigModule = ({
   const sysConfigLsKey = 'sysConfig'
   const userConfigLsKey = 'userConfig'
 
-  const sysConfigMap = LS.get(sysConfigLsKey)
-  const userConfigMap = LS.get(userConfigLsKey)
+  const sysConfigMap = LS.get(sysConfigLsKey) || {}
+  const userConfigMap = LS.get(userConfigLsKey) || {}
 
   return {
     namespaced: true,
@@ -83,24 +81,22 @@ export const initConfigModule = ({
       }
     },
     actions: {
-      async getConfig({ state, commit }, { config, path, passCache }) {
+      async getConfig({ state, commit }, { path, passCache }) {
+        console.log('getConfig', path)
         let cacheSysConfig = state.sysConfigMap[path]
 
         let cacheUserConfig = state.userConfigMap[path]
 
         if (!cacheSysConfig || passCache) {
+          console.log('getConfig cacheSysConfig', path, cacheSysConfig)
           cacheSysConfig = await getSysConfigFunc(path)
           commit('setSysConfig', { path, config: cacheSysConfig })
         }
         if (!cacheUserConfig || passCache) {
+          console.log('getConfig cacheUserConfig', path, cacheUserConfig)
           cacheUserConfig = await getUserConfigFunc(path)
           commit('setUserConfig', { path, config: cacheUserConfig })
         }
-
-        let cacheConfig = config
-        cacheConfig = merge(cacheSysConfig, cacheConfig)
-        cacheConfig = merge(cacheUserConfig, cacheConfig)
-        return cacheConfig
       }
     }
   }

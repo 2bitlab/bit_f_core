@@ -27,7 +27,6 @@ export type LogoutFunc = ({
 export type GetAccessFunc = (userId: string) => Promise<Access>
 export type GetUserInfoFunc = (userId: string) => Promise<UserInfo>
 export type GetGuideStepFunc = (userId: string) => Promise<any>
-export type GetMenuListFunc = (permission: string[]) => any[]
 export interface InitUserModuleProps {
   i18n: UserI18n
   LS: any
@@ -35,8 +34,6 @@ export interface InitUserModuleProps {
   getAccessFunc: GetAccessFunc
   getUserInfoFunc: GetUserInfoFunc
   getGuideStepFunc: GetGuideStepFunc
-  getMenuListFunc: GetMenuListFunc
-  getNavBarMenuListFunc: GetMenuListFunc
 }
 
 const initState = ({
@@ -59,9 +56,7 @@ export const initUserModule = ({
   logoutFunc,
   getAccessFunc,
   getUserInfoFunc,
-  getGuideStepFunc,
-  getMenuListFunc,
-  getNavBarMenuListFunc
+  getGuideStepFunc
 }: InitUserModuleProps) => ({
   namespaced: true,
   state: initState({
@@ -89,14 +84,6 @@ export const initUserModule = ({
     tokenInfoUserId(_, getters) {
       const { user_id } = getters.tokenInfo || {}
       return user_id
-    },
-    menuList(_, getters) {
-      const { permission } = getters
-      return getMenuListFunc(permission)
-    },
-    navBarMenuList(_, getters) {
-      const { permission } = getters
-      return getNavBarMenuListFunc(permission)
     }
   },
   mutations: {

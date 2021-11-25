@@ -5,21 +5,21 @@ interface PathParams {
   query?: any
 }
 
-type BeforeEachFunc = (to, from, next) => boolean
+type BeforeEachFunc = (to, from, next) => Promise<boolean>
 
 type PartialRouterUtil = Partial<RouterUtil>
 
 interface RouterUtilConstructorProps extends PartialRouterUtil {
   LS: any
   router: any
-  auth: any
+  auth?: any
 }
 
 class RouterUtil {
   NProgress: any
   LS: any
   router: any
-  auth: any
+  auth?: any
 
   debug = false
 
@@ -60,10 +60,13 @@ class RouterUtil {
   }
 
   checkPathPermission(path: string): boolean {
-    return this.auth.checkRoutePermission({
-      route: { path },
-      permissions: this.getPermissions()
-    })
+    if (this.auth) {
+      return this.auth.checkRoutePermission({
+        route: { path },
+        permissions: this.getPermissions()
+      })
+    }
+    return true
   }
 
   getHref(path: string, query?: any): string {
@@ -178,7 +181,7 @@ class RouterUtil {
       }
 
       if (canNext && beforeEachFunc) {
-        canNext = beforeEachFunc(to, from, next)
+        canNext = await beforeEachFunc(to, from, next)
       }
 
       if (canNext) {

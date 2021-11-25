@@ -10,6 +10,7 @@ export * from './apiDataModule/utils'
 export * from './offsetModule/utils'
 export * from './userModule/utils'
 export * from './eventListenerModule/utils'
+export * from './configModule/utils'
 
 // you do not need `import app from './modules/app'`
 // it will auto require all vuex module from modules file
