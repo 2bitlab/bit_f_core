@@ -20,6 +20,7 @@ export type ErrorPolicyMap = {
 
 export interface ErrorPolicyProps {
   LS: any
+  [key: string]: any
 }
 
 export type Method =
