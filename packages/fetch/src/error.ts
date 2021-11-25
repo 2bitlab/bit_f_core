@@ -121,10 +121,6 @@ export const getErrorPolicy = () => {
     cancelReq: () => {
       throw ''
     },
-    userExpire: ({ vm }) => {
-      vm.$router.push({ path: '/login' })
-    },
-
     tooManyReqError: ({ error, msgPost }) => {
       msgPost('访问过于频繁！')
       throw error
