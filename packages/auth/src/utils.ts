@@ -226,10 +226,3 @@ export const getPermissionMenuList = (
 
   return getFilterPermissionMenu(routeMenus, routePermissionMap, permissions)
 }
-
-export const defaultAuthFn = (
-  permission: string,
-  permissions: string[]
-): boolean => {
-  return permissions.includes(permission)
-}

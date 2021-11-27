@@ -7,8 +7,7 @@ import {
   getPermissionMapByRouterMap,
   getPermissionItemByRouter,
   getPermissionMenuItem,
-  getPermissionMenuList,
-  defaultAuthFn
+  getPermissionMenuList
 } from '../src/utils'
 
 const mockDashboardRoute = {
@@ -342,10 +341,5 @@ describe('src/utils.ts', () => {
         }
       ])
     )
-  })
-  it('defaultAuthFn', () => {
-    const test = defaultAuthFn('1', ['1', '2', '3'])
-
-    expect(test).toBe(true)
   })
 })
