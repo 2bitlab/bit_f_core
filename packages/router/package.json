@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/router",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "router 想用方法",
   "keywords": [
     "router"
@@ -37,6 +37,6 @@
     "url": "https://github.com/2bitlab/bit_f_core/issues"
   },
   "dependencies": {
-    "@2bitlab/qs": "^1.0.1"
+    "@2bitlab/qs": "^1.0.2"
   }
 }
