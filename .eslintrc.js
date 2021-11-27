@@ -1,3 +1,3 @@
 module.exports = {
-  extends: ['@belloai/eslint-config-vue-prettier-ts']
+  extends: ['@2bitlab/eslint-config-vue-prettier-ts']
 }

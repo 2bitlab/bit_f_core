@@ -16,7 +16,8 @@
       "@2bitlab/state/**",
       "@2bitlab/qs/**",
       "@2bitlab/router/**",
-      "@2bitlab/auth/**"
+      "@2bitlab/auth/**",
+      "@2bitlab/eslint-config-vue-prettier-ts/**"
     ]
   },
   "devDependencies": {
@@ -27,7 +28,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.16.0",
     "@babel/plugin-syntax-flow": "^7.16.0",
     "@babel/preset-typescript": "^7.16.0",
-    "@belloai/eslint-config-vue-prettier-ts": "^0.0.1",
+    "@2bitlab/eslint-config-vue-prettier-ts": "^1.0.0",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@vue/cli-plugin-babel": "~4.4.0",
