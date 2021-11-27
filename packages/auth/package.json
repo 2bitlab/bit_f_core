@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/auth",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "vue 鉴权插件",
   "author": "李广远 <liguangyuan@belloai.com>",
   "homepage": "https://github.com/2bitlab/bit_f_core#readme",
@@ -32,5 +32,8 @@
     "build": "rimraf lib/* && rollup -c",
     "watch": "rimraf lib/* && rollup -c -w",
     "prepublishOnly": "yarn run build"
+  },
+  "devDependencies": {
+    "vue": "^2.6.11"
   }
 }

@@ -1,3 +1,5 @@
+import _Vue from 'vue'
+
 import {
   RouteConfig,
   MenuItem,
@@ -8,13 +10,11 @@ import {
   getPermissionMenuItem,
   getPermissionMenuList
 } from './utils'
-declare global {
-  interface Window {
-    Vue: any
+declare module 'vue/types/vue' {
+  interface Vue {
+    $auth: (permission: string, msg?: string) => boolean
   }
 }
-
-export let _Vue
 
 const havePermission = (
   store: any,
@@ -37,28 +37,24 @@ const havePermission = (
 
   return haveAuth
 }
-
-export const inBrowser = typeof window !== 'undefined'
-class Auth {
+export class Auth {
   router: any
   routeMap: Map<string, RouteConfig>
   permissionRouterMap: Map<string, string[]>
 
   gettersName = 'userModule/permission'
 
-  constructor({ router }: { router: any }) {
+  constructor({ router, Vue }: { router: any; Vue: typeof _Vue }) {
     this.routeMap = new Map()
     this.permissionRouterMap = new Map()
 
     this.router = router
     this.initRouter()
+    this.install(Vue)
   }
 
-  static install(Vue: any): void {
+  install(Vue: any): void {
     console.log('Auth install')
-    if (_Vue === Vue) return
-    _Vue = Vue
-
     Vue.prototype.$auth = function (permissionName: string) {
       console.log('$auth permissionName =', permissionName)
       return havePermission(this.$store, permissionName)
@@ -105,10 +101,6 @@ class Auth {
       permissions
     )
   }
-}
-
-if (inBrowser && window.Vue) {
-  window.Vue.use(Auth)
 }
 
 export default Auth
