@@ -15,8 +15,7 @@
       "@2bitlab/moment/**",
       "@2bitlab/state/**",
       "@2bitlab/qs/**",
-      "@2bitlab/router/**",
-      "@2bitlab/auth/**"
+      "@2bitlab/router/**"
     ]
   },
   "devDependencies": {
