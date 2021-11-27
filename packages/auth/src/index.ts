@@ -1,3 +1,4 @@
+import _Vue from 'vue'
 import {
   RouteConfig,
   MenuItem,
@@ -8,18 +9,18 @@ import {
   getPermissionMenuItem,
   getPermissionMenuList
 } from './utils'
+
 declare global {
   interface Window {
     Vue: any
   }
 }
+
 declare module 'vue/types/vue' {
   interface Vue {
     $auth: (permission: string, msg?: string) => boolean
   }
 }
-
-let _Vue
 
 const havePermission = (
   store: any,
@@ -59,10 +60,8 @@ class Auth {
     this.initRouter()
   }
 
-  static install(Vue: any): void {
+  static install(Vue: typeof _Vue): void {
     console.log('Auth install')
-    if (_Vue === Vue) return
-    _Vue = Vue
 
     Vue.prototype.$auth = function (permissionName: string) {
       console.log('$auth permissionName =', permissionName)
