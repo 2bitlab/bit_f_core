@@ -5,9 +5,9 @@
   "author": "thomasliu <thomas_0836@qq.com>",
   "homepage": "https://github.com/2bitlab/bit_f_core#readme",
   "license": "ISC",
-  "main": "tsconfig.preset.json",
+  "main": "tsconfig.json",
   "files": [
-    "tsconfig.preset.json"
+    "*.json"
   ],
   "publishConfig": {
     "access": "public"

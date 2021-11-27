@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/moment",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "moment 的常用工具",
   "keywords": [
     "moment"
@@ -36,7 +36,7 @@
   "bugs": {
     "url": "https://github.com/2bitlab/bit_f_core/issues"
   },
-  "dependencies": {
+  "peerDependencies": {
     "moment": "^2.29.1"
   }
 }
