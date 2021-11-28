@@ -83,7 +83,7 @@ class Auth {
       useRoutes = optionRoutes
     }
 
-    this.routeMap = getRouterMapByRouter(routes)
+    this.routeMap = getRouterMapByRouter(useRoutes)
     this.permissionRouterMap = getPermissionMapByRouterMap(this.routeMap)
   }
 
