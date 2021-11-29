@@ -45,7 +45,12 @@ export default ({
       ],
       plugins: [
         resolve({ extensions }),
-        babel({ extensions, include: ['./src/**/*'] })
+        babel({
+          extensions,
+          include: ['./src/**/*'],
+          runtimeHelpers: true,
+          exclude: 'node_modules/**'
+        })
       ],
       output: [
         {
