@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/stylelint",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "2bitlab 前端 vue 项目代码规范 `stylelint`",
   "keywords": [
     "stylelint"

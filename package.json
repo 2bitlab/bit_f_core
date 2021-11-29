@@ -20,6 +20,7 @@
     ]
   },
   "devDependencies": {
+    "@2bitlab/eslint-config-vue-prettier-ts": "^1.0.0",
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/plugin-proposal-class-properties": "^7.16.0",
@@ -27,7 +28,6 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.16.0",
     "@babel/plugin-syntax-flow": "^7.16.0",
     "@babel/preset-typescript": "^7.16.0",
-    "@2bitlab/eslint-config-vue-prettier-ts": "^1.0.0",
     "@commitlint/cli": "^12.1.4",
     "@commitlint/config-conventional": "^12.1.4",
     "@vue/cli-plugin-babel": "~4.4.0",
@@ -39,6 +39,7 @@
     "@vue/cli-plugin-unit-jest": "~4.4.0",
     "@vue/cli-plugin-vuex": "~4.4.0",
     "@vue/cli-service": "~4.4.0",
+    "babel-plugin-module-resolver": "^4.1.0",
     "cross-env": "^7.0.3",
     "eslint": "^7.29.0",
     "eslint-plugin-prettier": "^3.4.0",

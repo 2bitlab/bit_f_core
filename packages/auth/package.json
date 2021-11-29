@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/auth",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "vue 鉴权插件",
   "author": "李广远 <liguangyuan@belloai.com>",
   "homepage": "https://github.com/2bitlab/bit_f_core#readme",
