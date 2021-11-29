@@ -16,8 +16,7 @@
       "@2bitlab/state/**",
       "@2bitlab/qs/**",
       "@2bitlab/router/**",
-      "@2bitlab/auth/**",
-      "@2bitlab/eslint-config-vue-prettier-ts/**"
+      "@2bitlab/auth/**"
     ]
   },
   "devDependencies": {
@@ -98,5 +97,79 @@
     ],
     "absolute": true,
     "gitignore": true
+  },
+  "eslintConfig": {
+    "extends": [
+      "@2bitlab/eslint-config-vue-prettier-ts"
+    ]
+  },
+  "eslintIgnore": [
+    "build/*",
+    "config/*.js",
+    "dist/*.js",
+    "node_modules/*"
+  ],
+  "prettier": {
+    "arrowParens": "avoid",
+    "bracketSpacing": true,
+    "endOfLine": "lf",
+    "htmlWhitespaceSensitivity": "strict",
+    "jsxBracketSameLine": false,
+    "jsxSingleQuote": true,
+    "proseWrap": "never",
+    "quoteProps": "as-needed",
+    "semi": false,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false,
+    "vueIndentScriptAndStyle": false,
+    "trailingComma": "none"
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ]
+  },
+  "jest": {
+    "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+    "testMatch": [
+      "<rootDir>/packages/**/*.test.ts"
+    ],
+    "modulePathIgnorePatterns": [
+      "<rootDir>/projects/"
+    ]
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "yarn lint:eslint",
+      "yarn lint:prettier",
+      "yarn test:unit:git"
+    ],
+    "{!(package)*.json,*.code-snippets,.!(browserslist)*rc}": [
+      "yarn lint:prettier --parser json"
+    ],
+    "package.json": [
+      "yarn lint:prettier"
+    ],
+    "*.vue": [
+      "yarn lint:eslint",
+      "yarn lint:stylelint",
+      "yarn lint:prettier",
+      "yarn test:unit:git"
+    ],
+    "*.scss": [
+      "yarn lint:stylelint",
+      "yarn lint:prettier"
+    ],
+    "*.md": [
+      "yarn lint:markdownlint",
+      "yarn lint:prettier"
+    ],
+    "*.{png,jpeg,jpg,gif,svg}": [
+      "imagemin-lint-staged"
+    ]
+  },
+  "stylelint": {
+    "extends": "@2bitlab/stylelint"
   }
 }

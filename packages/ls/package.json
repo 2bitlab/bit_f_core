@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/ls",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "base64 的Local Storage",
   "keywords": [
     "Local",

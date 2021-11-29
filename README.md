@@ -59,10 +59,10 @@ git submodule foreach git pull
 #### 添加新的 git submodule
 
 ```bash
-git submodule add git@github.com:threfo/subapp_vue_demo.git projects/subapp_vue_demo
+git submodule add git@github.com:2bitlab/subapp_vue_demo.git projects/subapp_vue_demo
 ```
 
-上面命令的 `git@github.com:threfo/subapp_vue_demo.git` 为仓库地址，`projects/subapp_vue_demo` 为储存路径，这里我们约定所有的子项目都存放在 `projects` 文件夹中
+上面命令的 `git@github.com:2bitlab/subapp_vue_demo.git` 为仓库地址，`projects/subapp_vue_demo` 为储存路径，这里我们约定所有的子项目都存放在 `projects` 文件夹中
 
 然后需要在根目录的 `package.json` 内添加
 

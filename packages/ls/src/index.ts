@@ -1,5 +1,5 @@
 import store from 'store'
-import jsBase from 'js-base64'
+import { decode, encode } from 'js-base64'
 
 interface Store {
   key: string
@@ -77,7 +77,7 @@ class Base64Store {
   b64ToUtf8(str: string): any {
     let utfStr = str
     try {
-      utfStr = decodeURIComponent(escape(jsBase.Base64.decode(str)))
+      utfStr = decodeURIComponent(escape(decode(str)))
     } catch (error) {
       // console.warn(error)
     }
@@ -92,9 +92,7 @@ class Base64Store {
   utf8ToB64(str: string): string {
     if (!this.isPass()) {
       try {
-        return jsBase.Base64.encode(
-          unescape(encodeURIComponent(JSON.stringify(str)))
-        )
+        return encode(unescape(encodeURIComponent(JSON.stringify(str))))
       } catch (error) {
         // console.warn(error)
       }

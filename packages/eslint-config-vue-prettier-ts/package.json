@@ -9,7 +9,7 @@
     "ts"
   ],
   "author": "thomas-ballo <liurongliang@balloai.com>",
-  "homepage": "https://github.com/threfo/bit_f_core#readme",
+  "homepage": "https://github.com/2bitlab/bit_f_core#readme",
   "license": "ISC",
   "main": "index.js",
   "publishConfig": {
@@ -17,11 +17,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/threfo/bit_f_core.git",
+    "url": "git+https://github.com/2bitlab/bit_f_core.git",
     "directory": "packages/eslint-config-vue-prettier-ts"
   },
   "bugs": {
-    "url": "https://github.com/threfo/bit_f_core/issues"
+    "url": "https://github.com/2bitlab/bit_f_core/issues"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^4.28.0",
