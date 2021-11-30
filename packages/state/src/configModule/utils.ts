@@ -31,14 +31,15 @@ export const initConfigMixin = ({ configModuleName = 'configModule' }) => {
         const { userConfigMap } = state || {}
         return userConfigMap
       },
-      pathConfig({ sysConfigMap, userConfigMap }) {
+      sysConfig({ sysConfigMap }) {
         const { path } = this.$route || {}
-        let sysConfig
-        let userConfig
-        if (path) {
-          sysConfig = (sysConfigMap || {})[path]
-          userConfig = (userConfigMap || {})[path]
-        }
+        return (sysConfigMap || {})[path]
+      },
+      userConfig({ userConfigMap }) {
+        const { path } = this.$route || {}
+        return (userConfigMap || {})[path]
+      },
+      pathConfig({ sysConfig, userConfig }) {
         return merge(cloneDeep(sysConfig || {}), cloneDeep(userConfig || {}))
       },
       currentConfig({ compConfig, overwriteConfig, pathConfig }) {
@@ -56,7 +57,8 @@ export const initConfigMixin = ({ configModuleName = 'configModule' }) => {
       },
       configI18n({ currentConfig }) {
         const { i18n } = currentConfig || {}
-        return i18n
+        const { locale } = this.$i18n || {}
+        return (i18n || {})[locale]
       }
     } as any,
     watch: {
@@ -65,8 +67,7 @@ export const initConfigMixin = ({ configModuleName = 'configModule' }) => {
           const { locale, messages } = this.$i18n || {}
           if (newValue && locale) {
             const langObj = messages[locale] || {}
-            const newLangObj = newValue[locale] || {}
-            const afterMerge = merge(cloneDeep(langObj), cloneDeep(newLangObj))
+            const afterMerge = merge(cloneDeep(langObj), cloneDeep(newValue))
             const needSetLocaleMessage = !isEqual(afterMerge, langObj)
             if (needSetLocaleMessage) {
               this.$i18n.setLocaleMessage(locale, afterMerge)
