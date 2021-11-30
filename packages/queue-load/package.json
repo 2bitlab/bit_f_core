@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/queue-load",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "队列加载工具",
   "keywords": [
     "Local",

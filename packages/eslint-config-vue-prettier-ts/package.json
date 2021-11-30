@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/eslint-config-vue-prettier-ts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "2bitlab 前端vue项目代码规范",
   "keywords": [
     "eslint",

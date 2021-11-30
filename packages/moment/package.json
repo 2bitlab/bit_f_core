@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/moment",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "moment 的常用工具",
   "keywords": [
     "moment"
@@ -38,5 +38,8 @@
   },
   "peerDependencies": {
     "moment": "^2.29.1"
+  },
+  "devDependencies": {
+    "@types/moment": "^2.13.0"
   }
 }
