@@ -1,4 +1,4 @@
-import { isFunction } from 'lodash'
+import { isFunction, isString } from 'lodash'
 
 import {
   CancelSource,
@@ -37,9 +37,12 @@ class FetchUtil {
   private errorKeyPolicy: ErrorKeyPolicyMap = getErrorKeyPolicy()
   private errorPolicyProps: any
   private cancelMap: CancelMap = {}
+  private apiPre = '/api/'
+  private debug = false
 
   constructor(props: FetchUtilProps) {
     const {
+      debug = false,
       errorKeyPolicy,
       errorPolicyProps,
       errorPolicy,
@@ -48,9 +51,10 @@ class FetchUtil {
       msgPost,
       needThrowResError,
       getAuthorization,
-      getCancelSource
+      getCancelSource,
+      apiPre
     } = props || {}
-
+    this.debug = debug
     this.instance = instance
     this.errorPolicyProps = errorPolicyProps
     this.msgPost = msgPost
@@ -71,6 +75,29 @@ class FetchUtil {
     if (hostnameMap) {
       this.hostnameMap = hostnameMap
     }
+    if (apiPre !== undefined) {
+      this.apiPre = apiPre
+    }
+  }
+
+  private log(...a) {
+    console.log(...a)
+  }
+
+  private getAuthorizationHeaders() {
+    let authorizationHeaders: any = {}
+    if (this.getAuthorization) {
+      const authorization = this.getAuthorization()
+      if (authorization) {
+        authorizationHeaders = authorization
+        if (isString(authorization)) {
+          authorizationHeaders = {
+            Authorization: authorization
+          }
+        }
+      }
+    }
+    return authorizationHeaders
   }
 
   private getRequestConfig(props: FetchProps) {
@@ -95,7 +122,7 @@ class FetchUtil {
         'Cache-Control': 'no-cache',
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        Authorization: this.getAuthorization && this.getAuthorization(),
+        ...(this.getAuthorizationHeaders() || {}),
         ...(headers || {})
       },
       timeout: 300000,
@@ -119,7 +146,7 @@ class FetchUtil {
     if (!host) {
       host = this.hostnameMap[location.hostname]
     }
-    return `${host || location.origin}/api/`
+    return `${host || location.origin}${this.apiPre}`
   }
 
   private checkCancel(cancelKey?: string) {
@@ -186,7 +213,7 @@ class FetchUtil {
         cancelKey = '',
         responseType = 'json'
       } = props || {}
-
+      this.log('coreFetch', props)
       const requestConfig = this.getRequestConfig({
         url,
         method,
@@ -210,15 +237,17 @@ class FetchUtil {
     })
   }
 
-  async fetch(
-    url = '',
-    data?: any,
-    method?: Method,
-    headers?: any,
-    cancelKey?: string,
-    responseType?: ResponseType,
-    isReturnResponse?: boolean
-  ): Promise<Response | undefined> {
+  async fetchByObj(props: FetchProps) {
+    const {
+      url = '',
+      data,
+      method,
+      headers,
+      cancelKey,
+      responseType,
+      isReturnResponse
+    } = props || {}
+
     let hackProps = {}
     let postData = {}
 
@@ -271,6 +300,26 @@ class FetchUtil {
       console.error('未知错误', error)
       throw error
     }
+  }
+
+  async fetch(
+    url = '',
+    data?: any,
+    method?: Method,
+    headers?: any,
+    cancelKey?: string,
+    responseType?: ResponseType,
+    isReturnResponse?: boolean
+  ): Promise<Response | undefined> {
+    return this.fetchByObj({
+      url,
+      data,
+      method,
+      headers,
+      cancelKey,
+      responseType,
+      isReturnResponse
+    })
   }
 }
 

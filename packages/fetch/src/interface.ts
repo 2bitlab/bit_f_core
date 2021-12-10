@@ -11,11 +11,11 @@ export type ErrorType =
   | 'fetchError'
 
 export type ErrorKeyPolicyMap = {
-  [key in ErrorType]: IsFetchErrorFunc
+  [key in ErrorType]?: IsFetchErrorFunc
 }
 
 export type ErrorPolicyMap = {
-  [key in ErrorType]: (props: any) => void
+  [key in ErrorType]?: (props: any) => void
 }
 
 export interface ErrorPolicyProps {
@@ -64,10 +64,12 @@ export interface FetchProps {
 }
 
 export interface FetchUtilProps {
+  debug?: boolean
   instance: any
   errorKeyPolicy?: ErrorKeyPolicyMap
   errorPolicy?: ErrorPolicyMap
   hostnameMap?: any
+  apiPre?: string
   errorPolicyProps: ErrorPolicyProps
   msgPost: (msg: string) => void
   getAuthorization: () => string
