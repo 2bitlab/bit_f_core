@@ -6,10 +6,6 @@ export interface I18nLangMap {
   [lang: string]: I18nMap
 }
 
-export interface UiMap {
-  [key: string]: string // class name
-}
-
 export interface ApiMap {
   [key: string]: string
 }
@@ -23,7 +19,6 @@ export interface VariableMap {
 }
 
 export interface Config {
-  ui?: UiMap
   i18n?: I18nLangMap
   feature?: FeatureMap
   api?: ApiMap
@@ -35,68 +30,69 @@ export interface ConfigMap {
 }
 
 export interface ConfigModuleState {
-  sysConfigMap: ConfigMap
-  userConfigMap: ConfigMap
+  configKeys: string[]
+  [key: string]: ConfigMap | any
 }
 
-export type GetSysConfigFunc = (path: string) => Promise<Config>
+export type GetConfigFunc = (path: string) => Promise<Config>
 
-export type GetUserConfigFunc = (path: string) => Promise<Config>
+export interface ConfigMapFunc {
+  [key: string]: GetConfigFunc
+}
 
 export interface InitConfigModuleProps {
   LS: any
   Vue: any
-  getSysConfigFunc: GetSysConfigFunc
-  getUserConfigFunc: GetUserConfigFunc
+  configMapFunc: ConfigMapFunc
 }
 
-const initState = ({ sysConfigMap, userConfigMap }): ConfigModuleState => ({
-  sysConfigMap,
-  userConfigMap
-})
+export const initState = (configKeys: string[], LS) => {
+  return configKeys.reduce(
+    (obj, key) => {
+      obj[key] = LS.get(key) || {}
+      return obj
+    },
+    { configKeys }
+  )
+}
 
 export const initConfigModule = ({
   LS,
   Vue,
-  getSysConfigFunc,
-  getUserConfigFunc
+  configMapFunc
 }: InitConfigModuleProps) => {
-  const sysConfigLsKey = 'sysConfig'
-  const userConfigLsKey = 'userConfig'
-
-  const sysConfigMap = LS.get(sysConfigLsKey) || {}
-  const userConfigMap = LS.get(userConfigLsKey) || {}
+  const configKeys = Object.keys(configMapFunc)
 
   return {
     namespaced: true,
-    state: initState({ sysConfigMap, userConfigMap }),
+    state: initState(configKeys, LS),
     mutations: {
-      setSysConfig(state: ConfigModuleState, { path, config }): void {
-        Vue.set(state.sysConfigMap, path, { ...config })
-        LS.set(sysConfigLsKey, state.sysConfigMap)
-      },
-      setUserConfig(state: ConfigModuleState, { path, config }): void {
-        Vue.set(state.userConfigMap, path, { ...config })
-        LS.set(userConfigLsKey, state.userConfigMap)
+      setConfig(state: ConfigModuleState, { path, config, key }): void {
+        Vue.set(state[key], path, { ...config })
+        LS.set(key, state[key])
       }
     },
     actions: {
       async getConfig({ state, commit }, { path, passCache }) {
         console.log('getConfig', path)
-        let cacheSysConfig = state.sysConfigMap[path]
 
-        let cacheUserConfig = state.userConfigMap[path]
+        const { configKeys } = state
 
-        if (!cacheSysConfig || passCache) {
-          console.log('getConfig cacheSysConfig', path, cacheSysConfig)
-          cacheSysConfig = await getSysConfigFunc(path)
-          commit('setSysConfig', { path, config: cacheSysConfig })
-        }
-        if (!cacheUserConfig || passCache) {
-          console.log('getConfig cacheUserConfig', path, cacheUserConfig)
-          cacheUserConfig = await getUserConfigFunc(path)
-          commit('setUserConfig', { path, config: cacheUserConfig })
-        }
+        await Promise.all(
+          configKeys.map(key => {
+            return new Promise(resolve => {
+              const cacheData = (state[key] || {})[path]
+              if (!cacheData || passCache) {
+                configMapFunc[key](path).then(config => {
+                  commit('setConfig', { path, config, key })
+                  resolve(config)
+                })
+              } else {
+                resolve(cacheData)
+              }
+            })
+          })
+        )
       }
     }
   }
