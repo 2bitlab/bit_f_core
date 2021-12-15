@@ -61,8 +61,6 @@ class Auth {
   }
 
   static install(Vue: typeof _Vue): void {
-    console.log('Auth install')
-
     Vue.prototype.$auth = function (permissionName: string) {
       console.log('$auth permissionName =', permissionName)
       return havePermission(this.$store, permissionName)

@@ -1,3 +1,5 @@
+import { mergeConfig } from './utils'
+
 export interface I18nMap {
   [key: string]: string
 }
@@ -31,6 +33,7 @@ export interface ConfigMap {
 
 export interface ConfigModuleState {
   configKeys: string[]
+  pathConfigMap: ConfigMap
   [key: string]: ConfigMap | any
 }
 
@@ -52,7 +55,7 @@ export const initState = (configKeys: string[], LS) => {
       obj[key] = LS.get(key) || {}
       return obj
     },
-    { configKeys }
+    { configKeys, pathConfigMap: LS.get('pathConfigMap') || {} }
   )
 }
 
@@ -73,7 +76,26 @@ export const initConfigModule = ({
       }
     },
     actions: {
-      async getConfig({ state, commit }, { path, passCache }) {
+      setPathConfig({ state, commit }, path) {
+        const { configKeys } = state
+
+        const pathConfig = configKeys
+          .map(configKey => {
+            const configPathMap = state[configKey] || {}
+
+            return configPathMap[path] || {}
+          })
+          .reduce((obj, configObj) => {
+            obj = mergeConfig(configObj, obj)
+            return obj
+          }, {})
+
+        commit('setConfig', { path, config: pathConfig, key: 'pathConfigMap' })
+
+        return pathConfig
+      },
+
+      async getConfig({ state, commit, dispatch }, { path, passCache }) {
         console.log('getConfig', path)
 
         const { configKeys } = state
@@ -93,6 +115,8 @@ export const initConfigModule = ({
             })
           })
         )
+
+        return await dispatch('setPathConfig', path)
       }
     }
   }

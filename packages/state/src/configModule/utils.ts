@@ -1,4 +1,91 @@
-import { merge, isEqual, cloneDeep, assign, isString, isObject } from 'lodash'
+import { merge, isEqual, isString, isObject } from 'lodash'
+
+const debug = true
+
+export const cloneObj = obj => JSON.parse(JSON.stringify(obj || {}))
+
+export const getTagName = item => {
+  const { $vnode } = item
+  const { tag } = $vnode || {}
+  return tag
+}
+
+export const getComponentName = item => {
+  const tag = getTagName(item)
+  const tagNames = (tag || '').split('-')
+  const { length } = tagNames || []
+  return length === 0 ? tag : tagNames[length - 1]
+}
+
+export const componentLog = (that, ...a) => {
+  if (debug) {
+    console.log(getComponentName(that), ...a)
+  }
+}
+
+export const getObjByBaseObj = (targetObj, baseObj) => {
+  return Object.keys(baseObj || {}).reduce((obj, key) => {
+    obj[key] = (targetObj || {})[key]
+    return obj
+  }, {})
+}
+
+export const replaceObjKey = (sourceObj: any, overwriteObj: any) => {
+  return cloneObj({
+    ...(sourceObj || {}),
+    ...(overwriteObj || {})
+  })
+}
+
+export const getMergeConfigFuncMap = () => {
+  return {
+    i18n: merge,
+    feature: replaceObjKey,
+    api: replaceObjKey,
+    variable: replaceObjKey
+  }
+}
+
+export const getNeedConfig = (targetObj: any, sourceObj: any) => {
+  return cloneObj(
+    Object.keys(sourceObj || {}).reduce((configObj, configKey) => {
+      const sourceValue = (sourceObj || {})[configKey] || {}
+      const targetValue = (targetObj || {})[configKey]
+      if (targetValue !== undefined) {
+        if (configKey === 'i18n') {
+          configObj[configKey] = Object.keys(sourceValue).reduce(
+            (langObj, langKey) => {
+              const sourceLangValue = sourceValue[langKey]
+              const targetLangValue = targetValue[langKey]
+
+              if (targetLangValue) {
+                const newLangObj = getObjByBaseObj(
+                  targetLangValue,
+                  sourceLangValue
+                )
+                const { length } = Object.keys(newLangObj)
+                if (length) {
+                  langObj[langKey] = newLangObj
+                }
+              }
+
+              return langObj
+            },
+            {}
+          )
+        } else {
+          const newConfigValue = getObjByBaseObj(targetValue, sourceValue)
+          const { length } = Object.keys(newConfigValue)
+          if (length) {
+            configObj[configKey] = newConfigValue
+          }
+        }
+      }
+
+      return configObj
+    }, {})
+  )
+}
 
 /**
  * 具体看单测
@@ -7,23 +94,18 @@ import { merge, isEqual, cloneDeep, assign, isString, isObject } from 'lodash'
  * @returns
  */
 export const mergeConfig = (overwriteObj: any, sourceObj: any) => {
-  const keyMapFunc = {
-    i18n: merge,
-    feature: assign,
-    api: assign,
-    variable: assign
-  }
+  const keyMapFunc = getMergeConfigFuncMap()
   const returnObj = {}
   Object.keys(keyMapFunc).forEach(key => {
     const func = keyMapFunc[key]
 
-    returnObj[key] = func(
-      cloneDeep((sourceObj || {})[key] || {}),
-      cloneDeep((overwriteObj || {})[key] || {})
-    )
+    const sourceVal = cloneObj((sourceObj || {})[key] || {})
+    const overwriteVal = cloneObj((overwriteObj || {})[key] || {})
+    const afterVal = cloneObj(func(sourceVal, overwriteVal))
+    returnObj[key] = afterVal
   })
 
-  return returnObj
+  return cloneObj(returnObj)
 }
 
 export const fixUrlParams = (url: string, params?: any): string => {
@@ -92,7 +174,7 @@ export const saveConfigSetting = ({ that, commend }) => {
   }
 
   that.setConfig({ path, config: newValue, key })
-
+  that.setPathConfig(path)
   if (cd) {
     cd()
   }
@@ -171,16 +253,31 @@ export const apiPath2Obj = (apiPath: string | any, props?: any) => {
   }
 }
 
+export const getCurrentConfig = ({
+  orgPathConfig,
+  compConfig,
+  $overwriteConfig
+}) => {
+  const pathConfig = getNeedConfig(orgPathConfig, compConfig)
+  const currentConfig = [$overwriteConfig, pathConfig].reduce(
+    (obj, config) => {
+      return mergeConfig(config || {}, obj)
+    },
+    {
+      ...(compConfig || {})
+    }
+  )
+  return currentConfig
+}
+
 /**
  * 提供 config 的mixin
  */
 export const initConfigMixin = ({
   configModuleName = 'configModule',
-  configKeys = ['sysConfigMap', 'userConfigMap'],
   fetchUtil
 }: {
   configModuleName: string
-  configKeys: string[]
   fetchUtil: any
 }) => {
   return {
@@ -192,38 +289,27 @@ export const initConfigMixin = ({
       }
     },
     computed: {
-      ...configKeys.reduce((obj: any, key: string) => {
-        obj[`$${key}`] = function () {
-          const state = (this.$store?.state || {})[configModuleName] || {}
-          return state[key]
-        }
-        return obj
-      }, {}),
-      ...configKeys.reduce((obj: any, key: string) => {
-        obj[`$${key.replace('Map', '')}`] = function () {
-          const { path } = this.$route || {}
-          return (this[`$${key}`] || {})[path] || {}
-        }
-        return obj
-      }, {}),
-      $compConfig() {
-        const { config } = this.$options || {}
-        return config
-      },
-      $pathConfig() {
-        return configKeys.reduce((obj, key) => {
-          obj = mergeConfig(this[`$${key.replace('Map', '')}`] || {}, obj)
-          return obj
-        }, {})
-      },
-      $currentConfig({ $compConfig, $overwriteConfig, $pathConfig }) {
-        return [$compConfig, $overwriteConfig, $pathConfig].reduce(
-          (obj, config) => {
-            obj = mergeConfig(config || {}, obj)
-            return obj
-          },
-          {}
+      $currentConfig({ $overwriteConfig }) {
+        const { config: compConfig } = this.$options || {}
+
+        const { path } = this.$route || {}
+        const state = (this.$store?.state || {})[configModuleName] || {}
+        const orgPathConfig = (state.pathConfigMap || {})[path] || {}
+        const currentConfig = getCurrentConfig({
+          orgPathConfig,
+          compConfig,
+          $overwriteConfig
+        })
+
+        componentLog(
+          this,
+          '$currentConfig path:',
+          path,
+          '$currentConfig:',
+          currentConfig
         )
+
+        return currentConfig
       },
       $variable({ $currentConfig }) {
         const { variable } = $currentConfig || {}
@@ -241,7 +327,7 @@ export const initConfigMixin = ({
           const { locale, messages } = this.$i18n || {}
           if (newValue && locale) {
             const langObj = messages[locale] || {}
-            const afterMerge = merge(cloneDeep(langObj), cloneDeep(newValue))
+            const afterMerge = merge(cloneObj(langObj), cloneObj(newValue))
             const needSetLocaleMessage = !isEqual(afterMerge, langObj)
             if (needSetLocaleMessage) {
               this.$i18n.setLocaleMessage(locale, afterMerge)
@@ -251,23 +337,33 @@ export const initConfigMixin = ({
         immediate: true
       } as any
     },
-    methods: {
-      async $apiGetData(apiKey: string, props?: any) {
-        const apiPath = ((this.$currentConfig || {}).api || {})[apiKey]
-        if (!apiPath) {
-          console.error(`not '${apiKey}' api set in config.api`)
-          return
-        }
+    created() {
+      const { api } = this.$currentConfig || {}
+      // 注册 api 的方法
+      Object.keys(api).forEach(key => {
+        this[key] = async function (props?: any) {
+          const apiPath = ((this.$currentConfig || {}).api || {})[key]
 
-        const fetchProps = apiPath2Obj(apiPath, props)
-        const { url } = fetchProps || {}
-        if (!url) {
-          console.error(`'${apiKey}' can't get url`)
-          return
-        }
+          componentLog(this, key, 'apiPath:', apiPath)
 
-        return await fetchUtil.fetchByObj(fetchProps)
-      }
-    } as any
+          if (!apiPath) {
+            console.error(`not '${key}' api set in config.api`)
+            return
+          }
+
+          const fetchProps = apiPath2Obj(apiPath, props)
+          const { url } = fetchProps || {}
+
+          componentLog(this, key, 'url:', url)
+
+          if (!url) {
+            console.error(`'${key}' can't get url`)
+            return
+          }
+
+          return await fetchUtil.fetchByObj(fetchProps)
+        }
+      })
+    }
   } as any
 }
