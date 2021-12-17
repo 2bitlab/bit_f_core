@@ -70,13 +70,17 @@ export const initConfigModule = ({
     namespaced: true,
     state: initState(configKeys, LS),
     mutations: {
-      setConfig(state: ConfigModuleState, { path, config, key }): void {
+      setPathConfig(state: ConfigModuleState, { path, config, key }): void {
         Vue.set(state[key], path, { ...config })
+        LS.set(key, state[key])
+      },
+      setConfig(state: ConfigModuleState, { config, key }): void {
+        state[key] = { ...config }
         LS.set(key, state[key])
       }
     },
     actions: {
-      setPathConfig({ state, commit }, path) {
+      refreshPathConfig({ state, commit }, path) {
         const { configKeys } = state
 
         const pathConfig = configKeys
@@ -90,14 +94,16 @@ export const initConfigModule = ({
             return obj
           }, {})
 
-        commit('setConfig', { path, config: pathConfig, key: 'pathConfigMap' })
+        commit('setPathConfig', {
+          path,
+          config: pathConfig,
+          key: 'pathConfigMap'
+        })
 
         return pathConfig
       },
 
       async getConfig({ state, commit, dispatch }, { path, passCache }) {
-        console.log('getConfig', path)
-
         const { configKeys } = state
 
         await Promise.all(
@@ -106,7 +112,7 @@ export const initConfigModule = ({
               const cacheData = (state[key] || {})[path]
               if (!cacheData || passCache) {
                 configMapFunc[key](path).then(config => {
-                  commit('setConfig', { path, config, key })
+                  commit('setPathConfig', { path, config, key })
                   resolve(config)
                 })
               } else {
@@ -116,7 +122,7 @@ export const initConfigModule = ({
           })
         )
 
-        return await dispatch('setPathConfig', path)
+        return await dispatch('refreshPathConfig', path)
       }
     }
   }

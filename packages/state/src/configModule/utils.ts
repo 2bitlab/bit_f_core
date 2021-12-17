@@ -129,26 +129,29 @@ export const fixUrlParams = (url: string, params?: any): string => {
   return url
 }
 
-export const saveConfigSetting = ({ that, commend }) => {
-  const { value } = commend || {}
-  const { label, editMode, editValue, configKey, cd, lang, isDel, path } =
-    value || {}
-  const key = `${editMode}Map`
-
-  const configMapData = that[key] || {}
-
-  const pathConfigData = configMapData[path] || {}
-
-  const configKeyData = pathConfigData[configKey] || {}
-
-  let newValue
-
+export const getConfigWillSetValue = editValue => {
   let willSetValue = editValue
   try {
     willSetValue = JSON.parse(willSetValue)
   } catch (error) {
     console.warn(error)
   }
+
+  return willSetValue
+}
+
+export const savePathConfigSetting = ({ that, commend }) => {
+  const { value } = commend || {}
+  const { label, editMode, editValue, configKey, cd, lang, isDel, path } =
+    value || {}
+  const key = `${editMode}Map`
+  const willSetValue = getConfigWillSetValue(editValue)
+
+  const configMapData = that[key] || {}
+  const pathConfigData = configMapData[path] || {}
+  const configKeyData = pathConfigData[configKey] || {}
+
+  let newValue
 
   if (configKey === 'i18n') {
     const langObj = configKeyData[lang] || {}
@@ -159,7 +162,7 @@ export const saveConfigSetting = ({ that, commend }) => {
         ...configKeyData,
         [lang]: {
           ...langObj,
-          [label]: willSetValue
+          [label]: `${willSetValue}`
         }
       }
     }
@@ -181,8 +184,9 @@ export const saveConfigSetting = ({ that, commend }) => {
     }
   }
 
-  that.setConfig({ path, config: newValue, key })
-  that.setPathConfig(path)
+  that.setPathConfig({ path, config: newValue, key })
+  that.refreshPathConfig(path)
+
   if (cd) {
     cd()
   }
@@ -196,6 +200,26 @@ export const saveConfigSetting = ({ that, commend }) => {
       ...configMapData,
       [path]: newValue
     }
+  }
+}
+
+export const saveConfigSetting = ({ that, commend }) => {
+  const { value } = commend || {}
+  const { editMode: key, editValue, cd, path } = value || {}
+  const config = getConfigWillSetValue(editValue)
+
+  that.setConfig({ config, key })
+  that.refreshPathConfig(path)
+
+  if (cd) {
+    cd()
+  }
+
+  return {
+    path,
+    config,
+    key,
+    commend
   }
 }
 
@@ -309,14 +333,6 @@ export const initConfigMixin = ({
           $overwriteConfig
         })
 
-        componentLog(
-          this,
-          '$currentConfig path:',
-          path,
-          '$currentConfig:',
-          currentConfig
-        )
-
         return currentConfig
       },
       $variable({ $currentConfig }) {
@@ -359,8 +375,6 @@ export const initConfigMixin = ({
         this[key] = async function (props?: any) {
           const apiPath = ((this.$currentConfig || {}).api || {})[key]
 
-          componentLog(this, key, 'apiPath:', apiPath)
-
           if (!apiPath) {
             console.error(`not '${key}' api set in config.api`)
             return
@@ -368,8 +382,6 @@ export const initConfigMixin = ({
 
           const fetchProps = apiPath2Obj(apiPath, props)
           const { url } = fetchProps || {}
-
-          componentLog(this, key, 'url:', url)
 
           if (!url) {
             console.error(`'${key}' can't get url`)
