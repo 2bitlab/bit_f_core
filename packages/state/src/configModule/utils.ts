@@ -130,9 +130,9 @@ export const fixUrlParams = (url: string, params?: any): string => {
 }
 
 export const saveConfigSetting = ({ that, commend }) => {
-  const { path } = that.$route || {}
   const { value } = commend || {}
-  const { label, editMode, editValue, configKey, cd, lang } = value || {}
+  const { label, editMode, editValue, configKey, cd, lang, isDel, path } =
+    value || {}
   const key = `${editMode}Map`
 
   const configMapData = that[key] || {}
@@ -163,6 +163,10 @@ export const saveConfigSetting = ({ that, commend }) => {
         }
       }
     }
+
+    if (isDel) {
+      delete newValue[configKey][lang][label]
+    }
   } else {
     newValue = {
       ...pathConfigData,
@@ -170,6 +174,10 @@ export const saveConfigSetting = ({ that, commend }) => {
         ...configKeyData,
         [label]: willSetValue
       }
+    }
+
+    if (isDel) {
+      delete newValue[configKey][label]
     }
   }
 
@@ -315,6 +323,10 @@ export const initConfigMixin = ({
         const { variable } = $currentConfig || {}
         return variable || {}
       },
+      $feature({ $currentConfig }) {
+        const { feature } = $currentConfig || {}
+        return feature || {}
+      },
       $configI18n({ $currentConfig }) {
         const { i18n } = $currentConfig || {}
         const { locale } = this.$i18n || {}
@@ -327,7 +339,10 @@ export const initConfigMixin = ({
           const { locale, messages } = this.$i18n || {}
           if (newValue && locale) {
             const langObj = messages[locale] || {}
-            const afterMerge = merge(cloneObj(langObj), cloneObj(newValue))
+            const afterMerge = {
+              ...langObj,
+              ...newValue
+            }
             const needSetLocaleMessage = !isEqual(afterMerge, langObj)
             if (needSetLocaleMessage) {
               this.$i18n.setLocaleMessage(locale, afterMerge)
