@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@2bitlab/eslint-config-vue-prettier-ts": "^1.0.0",
+    "@2bitlab/stylelint": "^1.0.1",
     "@babel/cli": "^7.16.0",
     "@babel/core": "^7.16.0",
     "@babel/plugin-proposal-class-properties": "^7.16.0",
