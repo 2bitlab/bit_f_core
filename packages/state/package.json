@@ -1,6 +1,6 @@
 {
   "name": "@2bitlab/state",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "常用的state应用的构建方法",
   "keywords": [
     "state"
