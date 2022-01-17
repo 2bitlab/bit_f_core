@@ -18,11 +18,6 @@ export type ErrorPolicyMap = {
   [key in ErrorType]?: (props: any) => void
 }
 
-export interface ErrorPolicyProps {
-  LS: any
-  [key: string]: any
-}
-
 export type Method =
   | 'get'
   | 'GET'
@@ -70,12 +65,21 @@ export interface FetchUtilProps {
   errorPolicy?: ErrorPolicyMap
   hostnameMap?: any
   apiPre?: string
-  errorPolicyProps: ErrorPolicyProps
+  lsApiKey?: string
+  errorPolicyProps: any
+  LS: any
   msgPost: (msg: string) => void
-  getAuthorization: () => string
+  getAuthorization: (props?: FetchProps) => string | any
   getCancelSource: () => CancelSource
+  getDefHeaders?: (props?: FetchProps) => any
+  getBaseUrl?: (props?: FetchProps) => string
   needThrowResError?: (resData: Response) => boolean
+  getSynchronizeApis?: (props: FetchProps, res: any) => Promise<FetchProps[]>
   isExpire: () => boolean
+}
+
+export interface FetchPropsUrlMap {
+  [url: string]: FetchProps
 }
 
 export interface Response {

@@ -12,7 +12,7 @@ import {
   ResponseType
 } from './interface'
 
-import { needData, getUrl } from './utils'
+import { needData, getUrl, getSynchronizeApisProps } from './utils'
 
 import {
   getErrorKey,
@@ -25,9 +25,13 @@ class FetchUtil {
   instance: any = null // 请求的实例，如 axios.create()
 
   private msgPost?: (msg: string) => void
-  private getAuthorization?: () => string
+  private getAuthorization?: (props?: FetchProps) => string | any
   private getCancelSource?: () => CancelSource
   private isExpire?: () => boolean
+  private getSynchronizeApis?: (
+    props: FetchProps,
+    res: any
+  ) => Promise<FetchProps[]>
 
   private LS?: any
   private hostnameMap: any = {}
@@ -39,6 +43,7 @@ class FetchUtil {
   private cancelMap: CancelMap = {}
   private apiPre = '/api/'
   private debug = false
+  private lsApiKey = 'apiServer'
 
   constructor(props: FetchUtilProps) {
     const {
@@ -52,7 +57,12 @@ class FetchUtil {
       needThrowResError,
       getAuthorization,
       getCancelSource,
-      apiPre
+      getDefHeaders,
+      getBaseUrl,
+      getSynchronizeApis,
+      apiPre,
+      LS,
+      lsApiKey = 'apiServer'
     } = props || {}
     this.debug = debug
     this.instance = instance
@@ -60,8 +70,10 @@ class FetchUtil {
     this.msgPost = msgPost
     this.getAuthorization = getAuthorization
     this.getCancelSource = getCancelSource
-    const { LS } = errorPolicyProps
+
     this.LS = LS
+
+    this.lsApiKey = lsApiKey
 
     if (errorKeyPolicy) {
       this.initErrorKeyPolicy(errorKeyPolicy)
@@ -72,6 +84,16 @@ class FetchUtil {
     if (needThrowResError) {
       this.needThrowResError = needThrowResError
     }
+    if (getDefHeaders) {
+      this.getDefHeaders = getDefHeaders
+    }
+    if (getBaseUrl) {
+      this.getBaseUrl = getBaseUrl
+    }
+    if (getSynchronizeApis) {
+      this.getSynchronizeApis = getSynchronizeApis
+    }
+
     if (hostnameMap) {
       this.hostnameMap = hostnameMap
     }
@@ -81,13 +103,15 @@ class FetchUtil {
   }
 
   private log(...a) {
-    console.log(...a)
+    if (this.debug) {
+      console.log(...a, this)
+    }
   }
 
-  private getAuthorizationHeaders() {
+  private getAuthorizationHeaders(props?: FetchProps) {
     let authorizationHeaders: any = {}
     if (this.getAuthorization) {
-      const authorization = this.getAuthorization()
+      const authorization = this.getAuthorization(props)
       if (authorization) {
         authorizationHeaders = authorization
         if (isString(authorization)) {
@@ -98,6 +122,18 @@ class FetchUtil {
       }
     }
     return authorizationHeaders
+  }
+
+  private getDefHeaders(props?: FetchProps) {
+    this.log('getDefHeaders', props)
+    const { _apiHeaders } = (window || {}) as any
+
+    return {
+      'Cache-Control': 'no-cache',
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...(_apiHeaders || {})
+    }
   }
 
   private getRequestConfig(props: FetchProps) {
@@ -116,13 +152,11 @@ class FetchUtil {
         url,
         method,
         data,
-        baseUrl: this.getBaseUrl()
+        baseUrl: this.getBaseUrl(props)
       }),
       headers: {
-        'Cache-Control': 'no-cache',
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-        ...(this.getAuthorizationHeaders() || {}),
+        ...(this.getDefHeaders(props) || {}),
+        ...(this.getAuthorizationHeaders(props) || {}),
         ...(headers || {})
       },
       timeout: 300000,
@@ -141,10 +175,24 @@ class FetchUtil {
     return requestConfig
   }
 
-  private getBaseUrl() {
-    let host = this.LS.get('apiServer')
+  getOtherBaseUrl(): string {
+    let host
+    if (this.lsApiKey) {
+      host = this.LS.get(this.lsApiKey)
+    }
+    return host || ''
+  }
+
+  getHostNameMapUrl(): string {
+    return this.hostnameMap[location.hostname] || location.origin
+  }
+
+  getBaseUrl(props?: FetchProps): string {
+    this.log('getBaseUrl', props)
+    let host = this.getOtherBaseUrl()
+
     if (!host) {
-      host = this.hostnameMap[location.hostname]
+      host = this.getHostNameMapUrl()
     }
     return `${host || location.origin}${this.apiPre}`
   }
@@ -203,6 +251,27 @@ class FetchUtil {
     return getErrorKey(error, this.errorKeyPolicy)
   }
 
+  private async fetchSynchronizeApis(props: FetchProps, res: any) {
+    this.log('fetchSynchronizeApis', props)
+    if (this.getSynchronizeApis) {
+      const needSynchronizeApis = await this.getSynchronizeApis(props, res)
+      const apiProps = getSynchronizeApisProps({
+        needSynchronizeApis,
+        res,
+        props
+      })
+      const { length } = apiProps || []
+
+      if (length) {
+        try {
+          await Promise.all(apiProps.map(item => this.coreFetch(item)))
+        } catch (error) {
+          console.error('fetchSynchronizeApis', error)
+        }
+      }
+    }
+  }
+
   coreFetch(props: FetchProps) {
     return new Promise((resolve, reject) => {
       const {
@@ -253,6 +322,8 @@ class FetchUtil {
 
     if (Array.isArray(data)) {
       postData = data
+    } else if (data instanceof FormData) {
+      postData = data
     } else {
       const { hackProps: dataHackProps, ...postDataObj } = data || {}
       hackProps = dataHackProps
@@ -275,28 +346,40 @@ class FetchUtil {
         throw res.data
       }
 
+      this.fetchSynchronizeApis(props, res)
+
       if (isReturnResponse) {
         return res
       }
       return res.data
     } catch (error: any) {
-      console.log(error)
+      this.log('fetchByObj error', error)
+
+      const msgPost = msg => {
+        const { notMsgPost } = (hackProps || {}) as any
+        if (!notMsgPost) {
+          this.msgPost && this.msgPost(msg)
+        }
+      }
+
       const errorKey = this.getErrorKey(error)
       if (errorKey) {
         const errorPolicyFunc = this.errorPolicy[errorKey]
         if (isFunction(errorPolicyFunc)) {
+          error.errorType = errorKey
           errorPolicyFunc({
-            ...this.errorPolicyProps,
+            LS: this.LS,
             error,
             location: window.location,
             hackProps,
-            msgPost: this.msgPost
+            msgPost,
+            ...(this.errorPolicyProps || {})
           })
 
           return
         }
       }
-      this.msgPost && this.msgPost('系统异常，请联系管理员')
+      msgPost('系统异常，请联系管理员')
       console.error('未知错误', error)
       throw error
     }
@@ -311,7 +394,7 @@ class FetchUtil {
     responseType?: ResponseType,
     isReturnResponse?: boolean
   ): Promise<Response | undefined> {
-    return this.fetchByObj({
+    return await this.fetchByObj({
       url,
       data,
       method,
