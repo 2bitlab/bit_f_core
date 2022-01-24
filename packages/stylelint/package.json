@@ -15,7 +15,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/2bitlab/bit_f_core.git",
-    "directory": "packages/eslint-config-vue-prettier-ts"
+    "directory": "packages/stylelint"
   },
   "bugs": {
     "url": "https://github.com/2bitlab/bit_f_core/issues"
