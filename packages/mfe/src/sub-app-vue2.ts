@@ -1,3 +1,4 @@
+import { isFunction } from 'lodash'
 export interface VueRouterProps {
   subAppBase: string
   routes: any[]
@@ -12,7 +13,13 @@ export interface SubAppVue2Props {
   mountId?: string
   vueRouterProps: VueRouterProps
   vueProps: any
-  onSelfMount?: () => void
+  master?: any
+  instance?: any
+  router?: any
+  onSelfMount?: (props: SubAppVue2Props) => void
+  onSelfBeforeMount?: (props: SubAppVue2Props) => void
+  onMount?: (props: SubAppVue2Props) => void
+  onBeforeMount?: (props: SubAppVue2Props) => void
 }
 
 function render(props: SubAppVue2Props) {
@@ -24,10 +31,31 @@ function render(props: SubAppVue2Props) {
     mountId = '#app',
     vueRouterProps,
     vueProps,
-    onSelfMount
+    onSelfMount,
+    onSelfBeforeMount,
+    onMount,
+    onBeforeMount
   } = props || {}
 
   const { base = '/', subAppBase } = vueRouterProps || {}
+
+  let initVueProps = {
+    ...(vueProps || {})
+  }
+
+  let beforeMountFunc = onSelfBeforeMount
+
+  if ((<any>window).__POWERED_BY_QIANKUN__) {
+    beforeMountFunc = onBeforeMount
+  }
+
+  if (beforeMountFunc) {
+    const _initVueProps: any = beforeMountFunc(props)
+    initVueProps = {
+      ...(_initVueProps || {}),
+      ...initVueProps
+    }
+  }
 
   const router = new VueRouter({
     // 运行在主应用中时，添加路由命名空间
@@ -38,14 +66,22 @@ function render(props: SubAppVue2Props) {
 
   // 挂载应用
   const instance = new Vue({
-    ...vueProps,
+    ...initVueProps,
     router,
     render: (h: any) => h(App)
   }).$mount(mountId)
 
-  if (!(<any>window).__POWERED_BY_QIANKUN__ && !!onSelfMount) {
-    onSelfMount()
+  let mountFunc = onSelfMount
+
+  if ((<any>window).__POWERED_BY_QIANKUN__) {
+    mountFunc = onMount
   }
+
+  if (mountFunc) {
+    mountFunc(props)
+  }
+
+  console.log('subapp instance', instance)
 
   return {
     router,
@@ -74,15 +110,18 @@ export const initSubApp = (props: SubAppVue2Props) => {
    * 通常我们可以在这里做一些全局变量的初始化，比如不会在 unmount 阶段被销毁的应用级别的缓存等。
    */
   async function bootstrap() {
-    console.log('LoginMicroApp bootstraped')
+    console.log('MicroApp bootstraped')
   }
 
   /**
    * 应用每次进入都会调用 mount 方法，通常我们在这里触发应用的渲染方法
    */
   async function mount(mountProps: any) {
-    console.log('LoginMicroApp mount', mountProps)
-    const obj = render(props)
+    console.log('MicroApp mount', mountProps)
+
+    const { master } = mountProps || {}
+
+    const obj = render({ ...props, master })
     instance = obj.instance
     router = obj.router
   }
@@ -91,7 +130,7 @@ export const initSubApp = (props: SubAppVue2Props) => {
    * 应用每次 切出/卸载 会调用的方法，通常在这里我们会卸载微应用的应用实例
    */
   async function unmount() {
-    console.log('LoginMicroApp unmount')
+    console.log('MicroApp unmount')
     if (instance) {
       instance.$destroy()
     }
@@ -107,4 +146,64 @@ export const initSubApp = (props: SubAppVue2Props) => {
     instance,
     router
   }
+}
+
+export const initSubAppVue2OnBeforeMountInitVue = (props: SubAppVue2Props) => {
+  const { Vue: _Vue, master } = props || {}
+  const { vue, utils } = master || {}
+
+  if (vue) {
+    const { prototype, ...otherProps } = vue
+    Object.keys(prototype || {}).forEach(key => {
+      _Vue.prototype[key] = prototype[key]
+    })
+
+    Object.keys(otherProps).forEach(key => {
+      if (isFunction(_Vue[key])) {
+        const arr = otherProps[key]
+        if (Array.isArray(arr)) {
+          arr.forEach(item => {
+            if (key === 'component') {
+              const { name, component } = item
+              _Vue[key](name, component)
+            } else {
+              _Vue[key](item)
+            }
+          })
+        }
+      }
+    })
+
+    _Vue.prototype.$utils = utils
+  }
+}
+
+export const initSubAppVue2OnBeforeMountInitVueProps = (
+  props: SubAppVue2Props
+) => {
+  const { master, vueProps: _vueProps } = props || {}
+  const { store } = _vueProps || {}
+  const { vue, utils } = master || {}
+  const { store: masterStore } = utils || {}
+
+  const { initProps: vueProps } = vue || {}
+
+  if (store && masterStore) {
+    const modulesNamespaceMap = masterStore._modulesNamespaceMap || {}
+    Object.keys(modulesNamespaceMap).forEach(key => {
+      const module = modulesNamespaceMap[key]
+      const moduleName = key.replace(/\/$/, '')
+      if (!store.hasModule(moduleName)) {
+        store.registerModule(moduleName, module)
+      }
+    })
+  }
+
+  return vueProps
+}
+
+export const initSubAppVue2OnBeforeMount = (props: SubAppVue2Props) => {
+  initSubAppVue2OnBeforeMountInitVue(props)
+
+  return initSubAppVue2OnBeforeMountInitVueProps(props)
 }
